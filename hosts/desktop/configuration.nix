@@ -69,6 +69,21 @@
   # ПАКЕТ НЕ УКАЗЫВАЕМ — overlay уже подменил его на stable
   programs.amnezia-vpn.enable = true;
 
+  # Останавливаем процессы Amnezia перед сном, чтобы избежать утечек памяти.
+  environment.etc."systemd/system-sleep/amnezia-vpn-stop" = {
+    text = ''
+      #!/bin/sh
+      case "$1" in
+        pre)
+          ${pkgs.procps}/bin/pkill -fi amnezia || true
+          ;;
+        post)
+          ;;
+      esac
+    '';
+    mode = "0755";
+  };
+
   # System packages
   environment.systemPackages = with pkgs; [
     vim
