@@ -36,6 +36,11 @@
     layout = "us";
   };
 
+  # Nerd Font для корректного отображения иконок в TUI (например, yazi).
+  fonts.packages = with pkgs; [
+    nerd-fonts.hack
+  ];
+
   services.printing.enable = true;
   hardware.bluetooth.enable = true;
 
@@ -50,7 +55,10 @@
   };
 
   # Nix
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # Docker
   virtualisation.docker.enable = true;
@@ -59,11 +67,21 @@
   users.users.artem = {
     isNormalUser = true;
     description = "artem";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "docker"
+    ];
+    shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
     ];
   };
+
+  programs.nix-ld.enable = true;
+
+  # Системно включаем fish, чтобы оболочка была доступна как login shell.
+  programs.fish.enable = true;
 
   # Amnezia VPN
   # ПАКЕТ НЕ УКАЗЫВАЕМ — overlay уже подменил его на stable
@@ -86,23 +104,14 @@
 
   # System packages
   environment.systemPackages = with pkgs; [
-    vim
-    git
-    neofetch
-    telegram-desktop
-    google-chrome
-    zed-editor
-    bat
-    dua
-
     gcc
-    rust-analyzer
-    rustup
-
     docker-compose
-
     pkg-config
     openssl
+    rust-analyzer
+    rustup
+    nil
+    nixd
   ];
 
   # ⚠️ ВАЖНО: версия первого установленного NixOS

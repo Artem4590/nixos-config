@@ -1,0 +1,51 @@
+{
+  "ui_font_size": 16,
+  "buffer_font_size": 14,
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "Dracula",
+  },
+  "languages": {
+    "Python": {
+      "format_on_save": "off",
+    },
+    "Dockerfile": {
+      "format_on_save": "off",
+    },
+    "YAML": {
+      "format_on_save": "off",
+    },
+  },
+  "lsp": {
+    "rust-analyzer": {
+      "binary": {
+        "path": "/nix/store/vj1bblwn6zf60ikcsrxk410ha3mg9mrq-ruff-0.15.0/bin/rust-analyzer",
+      },
+    },
+    "ruff": {
+      "binary": {
+        "arguments": ["server"],
+        "path": "/nix/store/vj1bblwn6zf60ikcsrxk410ha3mg9mrq-ruff-0.15.0/bin/ruff",
+      },
+    },
+  },
+  "auto_install_extensions": {
+    "dockerfile": true,
+    "docker-compose": true,
+    "nix": true,
+    "python": true,
+    "rust": true,
+    "toml": true,
+    "yaml": true,
+    "catppuccin-icons": true,
+  },
+  "telemetry": {
+    "metrics": false,
+  },
+  "terminal": {
+    "shell": {
+      "program": "bash",
+    },
+  },
+}
