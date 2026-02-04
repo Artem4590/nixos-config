@@ -60,37 +60,42 @@
     isNormalUser = true;
     description = "artem";
     extraGroups = [ "networkmanager" "wheel" "docker" ];
+    shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
     ];
   };
 
+  # Системно включаем fish, чтобы оболочка была доступна как login shell.
+  programs.fish.enable = true;
+
   # Amnezia VPN
   # ПАКЕТ НЕ УКАЗЫВАЕМ — overlay уже подменил его на stable
   programs.amnezia-vpn.enable = true;
 
+  # Останавливаем процессы Amnezia перед сном, чтобы избежать утечек памяти.
+  environment.etc."systemd/system-sleep/amnezia-vpn-stop" = {
+    text = ''
+      #!/bin/sh
+      case "$1" in
+        pre)
+          ${pkgs.procps}/bin/pkill -fi amnezia || true
+          ;;
+        post)
+          ;;
+      esac
+    '';
+    mode = "0755";
+  };
+
   # System packages
   environment.systemPackages = with pkgs; [
-    vim
-    git
-    neofetch
-    telegram-desktop
-    google-chrome
-    zed-editor
-    bat
-    dua
-
     gcc
-    rust-analyzer
-    rustup
-
     docker-compose
-
     pkg-config
     openssl
   ];
 
   # ⚠️ ВАЖНО: версия первого установленного NixOS
-  system.stateVersion = "25.05";
+  system.stateVersion = "26.05";
 }
-
