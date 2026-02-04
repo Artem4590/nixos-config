@@ -3,7 +3,7 @@
 {
   home.username = "artem";
   home.homeDirectory = "/home/artem";
-  home.stateVersion = "25.05";
+  home.stateVersion = "26.05";
 
   programs.zsh.enable = true;
   programs.git.enable = true;
@@ -13,4 +13,3 @@
     ripgrep
   ];
 }
-
