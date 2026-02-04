@@ -60,10 +60,14 @@
     isNormalUser = true;
     description = "artem";
     extraGroups = [ "networkmanager" "wheel" "docker" ];
+    shell = pkgs.fish;
     packages = with pkgs; [
       kdePackages.kate
     ];
   };
+
+  # Системно включаем fish, чтобы оболочка была доступна как login shell.
+  programs.fish.enable = true;
 
   # Amnezia VPN
   # ПАКЕТ НЕ УКАЗЫВАЕМ — overlay уже подменил его на stable
@@ -86,21 +90,8 @@
 
   # System packages
   environment.systemPackages = with pkgs; [
-    vim
-    git
-    neofetch
-    telegram-desktop
-    google-chrome
-    zed-editor
-    bat
-    dua
-
     gcc
-    rust-analyzer
-    rustup
-
     docker-compose
-
     pkg-config
     openssl
   ];

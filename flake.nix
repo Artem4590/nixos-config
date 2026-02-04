@@ -53,6 +53,7 @@
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = "backup";
           home-manager.users.artem = import ./home/user.nix;
         }
       ];
