@@ -91,6 +91,5 @@
   ];
 
   # ⚠️ ВАЖНО: версия первого установленного NixOS
-  system.stateVersion = "25.05";
+  system.stateVersion = "26.05";
 }
-
