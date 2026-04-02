@@ -8,9 +8,6 @@
     # Stable nixpkgs — только для отдельных пакетов
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
 
-    # Точечный pin для zed-editor 0.224.11
-    nixpkgs-zed.url = "github:NixOS/nixpkgs/f20176b44b6edbe6e7d9340ae03d3c41e25ecc07";
-
     # Home Manager (master для unstable)
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -23,7 +20,6 @@
       self,
       nixpkgs,
       nixpkgs-stable,
-      nixpkgs-zed,
       home-manager,
       ...
     }:
@@ -42,20 +38,9 @@
         config.allowUnfree = true;
       };
 
-      # pkgs из pinned commit для zed-editor
-      pkgsZed = import nixpkgs-zed {
-        inherit system;
-        config.allowUnfree = true;
-      };
-
       # Overlay: берём amnezia-vpn из stable
       amneziaOverlay = final: prev: {
         amnezia-vpn = pkgsStable.amnezia-vpn;
-      };
-
-      # Overlay: фиксируем zed-editor на 0.224.11
-      zedOverlay = final: prev: {
-        zed-editor = pkgsZed.zed-editor;
       };
     in
     {
@@ -68,7 +53,6 @@
             nixpkgs.pkgs = pkgs;
             nixpkgs.overlays = [
               amneziaOverlay
-              zedOverlay
             ];
           }
 

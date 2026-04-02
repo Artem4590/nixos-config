@@ -5,6 +5,22 @@
   ...
 }:
 
+let
+  toggleBluetoothDevice = pkgs.writeShellScriptBin "toggle-bt-ac800a87d652" ''
+    #!/bin/sh
+    set -eu
+
+    device='AC:80:0A:87:D6:52'
+    bluetoothctl='${pkgs.bluez}/bin/bluetoothctl'
+
+    if "$bluetoothctl" info "$device" | ${pkgs.gnugrep}/bin/grep -q '^[[:space:]]*Connected: yes$'; then
+      exec "$bluetoothctl" disconnect "$device"
+    fi
+
+    "$bluetoothctl" power on
+    exec "$bluetoothctl" connect "$device"
+  '';
+in
 {
   home.username = "artem";
   home.homeDirectory = "/home/artem";
@@ -78,11 +94,25 @@
     '';
   };
 
+  programs.yazi = {
+    enable = true;
+    settings = {
+      mgr = {
+        show_hidden = true;
+      };
+    };
+  };
+
   home.file.".config/zed/settings.json".text = builtins.readFile ./zed/settings.json;
+
+  home.file.".config/JetBrains/pycharm64.vmoptions".text = ''
+    -Dawt.toolkit.name=WLToolkit
+  '';
 
   home.sessionVariables = {
     TERMINAL = "alacritty";
     NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+    PYCHARM_VM_OPTIONS = "${config.home.homeDirectory}/.config/JetBrains/pycharm64.vmoptions";
   };
 
   home.sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
@@ -109,9 +139,17 @@
     fi
   '';
 
+  xdg.desktopEntries.toggle-bluetooth-ac800a87d652 = {
+    name = "Toggle Bluetooth Device";
+    exec = "${toggleBluetoothDevice}/bin/toggle-bt-ac800a87d652";
+    terminal = false;
+    categories = [ "Utility" ];
+  };
+
   # Plasma: Ctrl+Alt+T запускает Alacritty.
   qt.kde.settings = {
     kglobalshortcutsrc."services"."Alacritty.desktop"._launch = "Ctrl+Alt+T";
+    kglobalshortcutsrc."services"."toggle-bluetooth-ac800a87d652.desktop"._launch = "Ctrl+B";
   };
 
   home.packages = with pkgs; [
@@ -124,13 +162,21 @@
     bat
     dua
     jq
-    neofetch
+    fastfetch
     uv
     ty
     mongodb-compass
     gnumake
     glow # Markdown terminal reader
-    yazi
     nodejs_25
+    opencode
+    unzip
+    jetbrains.pycharm
+    temporal-cli
+    anydesk
+    obs-studio
+    mpv
+    ffmpeg
+    toggleBluetoothDevice
   ];
 }

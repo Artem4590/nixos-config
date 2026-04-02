@@ -12,6 +12,8 @@
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
+  networking.firewall.allowedTCPPorts = [ 8010 ];
+
   time.timeZone = "Europe/Moscow";
 
   i18n.defaultLocale = "en_US.UTF-8";
@@ -100,6 +102,10 @@
       esac
     '';
     mode = "0755";
+  };
+
+  environment.sessionVariables = {
+    PYCHARM_VM_OPTIONS = "/home/artem/.config/JetBrains/pycharm64.vmoptions";
   };
 
   # System packages
