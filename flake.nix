@@ -5,6 +5,9 @@
     # Основной nixpkgs — unstable
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # Отдельно фиксируем nixpkgs для PyCharm на ревизии, где `jetbrains.pycharm = 2025.3.3`.
+    nixpkgs-pycharm.url = "github:NixOS/nixpkgs/5b2c2d84341b2afb5647081c1386a80d7a8d8605";
+
     # Stable nixpkgs — только для отдельных пакетов
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
 
@@ -19,6 +22,7 @@
     {
       self,
       nixpkgs,
+      nixpkgs-pycharm,
       nixpkgs-stable,
       home-manager,
       ...
@@ -38,9 +42,23 @@
         config.allowUnfree = true;
       };
 
+      # pkgs из фиксированного nixpkgs только для PyCharm
+      pkgsPycharm = import nixpkgs-pycharm {
+        inherit system;
+        config.allowUnfree = true;
+      };
+
       # Overlay: берём amnezia-vpn из stable
       amneziaOverlay = final: prev: {
         amnezia-vpn = pkgsStable.amnezia-vpn;
+      };
+
+      # Overlay: держим PyCharm на отдельной зафиксированной ревизии nixpkgs,
+      # чтобы он оставался на версии 2025.3.3 независимо от обновления остальной системы.
+      pycharmOverlay = final: prev: {
+        jetbrains = prev.jetbrains // {
+          pycharm = pkgsPycharm.jetbrains.pycharm;
+        };
       };
     in
     {
@@ -53,6 +71,7 @@
             nixpkgs.pkgs = pkgs;
             nixpkgs.overlays = [
               amneziaOverlay
+              pycharmOverlay
             ];
           }
 
