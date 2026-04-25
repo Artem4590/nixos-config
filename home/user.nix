@@ -48,6 +48,8 @@ in
 
   programs.bottom.enable = true;
 
+  programs.htop.enable = true;
+
   programs.alacritty = {
     enable = true;
     # theme = "xterm";
