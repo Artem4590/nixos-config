@@ -65,6 +65,9 @@
   # Docker
   virtualisation.docker.enable = true;
 
+  # VirtualBox
+  virtualisation.virtualbox.host.enable = true;
+
   # User
   users.users.artem = {
     isNormalUser = true;
@@ -73,6 +76,7 @@
       "networkmanager"
       "wheel"
       "docker"
+      "vboxusers"
     ];
     shell = pkgs.fish;
     packages = with pkgs; [
