@@ -155,7 +155,6 @@ in
   home.packages = with pkgs; [
     delta
     neovim
-    code-cursor
     telegram-desktop
     google-chrome
     zed-editor
@@ -165,7 +164,6 @@ in
     fastfetch
     uv
     ty
-    mongodb-compass
     gnumake
     glow # Markdown terminal reader
     nodejs_25
@@ -173,10 +171,8 @@ in
     unzip
     jetbrains.pycharm
     temporal-cli
-    anydesk
     obs-studio
     mpv
-    ffmpeg
     toggleBluetoothDevice
   ];
 }
