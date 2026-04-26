@@ -20,6 +20,18 @@ let
     "$bluetoothctl" power on
     exec "$bluetoothctl" connect "$device"
   '';
+
+  amneziaVpnSafeLauncher = pkgs.writeShellScriptBin "amnezia-vpn-safe-launcher" ''
+    #!/bin/sh
+    if [ -n "''${WAYLAND_DISPLAY-}" ]; then
+      export QT_QPA_PLATFORM=wayland
+    fi
+
+    export QT_XCB_GL_INTEGRATION=none
+    export QT_QUICK_BACKEND=software
+
+    exec /run/current-system/sw/bin/AmneziaVPN "$@"
+  '';
 in
 {
   home.username = "artem";
@@ -146,6 +158,22 @@ in
     exec = "${toggleBluetoothDevice}/bin/toggle-bt-ac800a87d652";
     terminal = false;
     categories = [ "Utility" ];
+  };
+
+  home.file.".local/share/applications/AmneziaVPN.desktop" = {
+    force = true;
+    text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=AmneziaVPN
+      Version=4.8.6.0
+      Comment=Client of your self-hosted VPN
+      Exec=${amneziaVpnSafeLauncher}/bin/amnezia-vpn-safe-launcher
+      Icon=/run/current-system/sw/share/pixmaps/AmneziaVPN.png
+      Categories=Network;Qt;Security;
+      Terminal=false
+      StartupNotify=true
+    '';
   };
 
   # Plasma: Ctrl+Alt+T запускает Alacritty.
