@@ -18,6 +18,12 @@
     "YAML": {
       "format_on_save": "off",
     },
+    "TSX": {
+      "format_on_save": "off",
+    },
+    "JavaScript": {
+      "format_on_save": "off",
+    },
   },
   "lsp": {
     "rust-analyzer": {
