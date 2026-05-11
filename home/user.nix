@@ -131,28 +131,6 @@ in
 
   home.sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
 
-  home.activation.installCodexFromNpm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    CODEX_NPM_PREFIX="${config.home.homeDirectory}/.npm-global"
-    CODEX_BIN="$CODEX_NPM_PREFIX/bin/codex"
-    NPM="${pkgs.nodejs_25}/bin/npm"
-    TIMEOUT="${pkgs.coreutils}/bin/timeout"
-
-    $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$CODEX_NPM_PREFIX"
-
-    # Не делаем npm install на каждом boot: ставим Codex только если бинарник отсутствует.
-    if [ ! -x "$CODEX_BIN" ]; then
-      echo "codex not found, installing @openai/codex into $CODEX_NPM_PREFIX"
-      if ! $DRY_RUN_CMD "$TIMEOUT" 45s "$NPM" install \
-        --prefix "$CODEX_NPM_PREFIX" \
-        --global \
-        --no-audit \
-        --no-fund \
-        @openai/codex; then
-        echo "warning: codex install timed out or failed; skipping for this activation"
-      fi
-    fi
-  '';
-
   xdg.desktopEntries.toggle-bluetooth-ac800a87d652 = {
     name = "Toggle Bluetooth Device";
     exec = "${toggleBluetoothDevice}/bin/toggle-bt-ac800a87d652";
