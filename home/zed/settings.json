@@ -7,6 +7,18 @@
     "light": "One Light",
     "dark": "Dracula",
   },
+  "project_panel": {
+    "dock": "left",
+  },
+  "git_panel": {
+    "dock": "left",
+  },
+  "agent": {
+    "dock": "right",
+  },
+  "minimap": {
+    "show": "always",
+  },
   "inlay_hints": { "show_value_hints": false },
   "languages": {
     "Python": {
