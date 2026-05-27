@@ -32,6 +32,8 @@ let
 
     exec /run/current-system/sw/bin/AmneziaVPN "$@"
   '';
+
+  happ-desktop = pkgs.callPackage ./happ-desktop.nix { };
 in
 {
   home.username = "artem";
@@ -182,5 +184,6 @@ in
     obs-studio
     mpv
     toggleBluetoothDevice
+    happ-desktop
   ];
 }

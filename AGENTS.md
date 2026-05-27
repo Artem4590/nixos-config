@@ -30,6 +30,7 @@ nixos-config/
 | Add a system service or kernel/system option | `hosts/desktop/configuration.nix` | Imported directly by `nixosConfigurations.desktop`. |
 | Add user programs, dotfiles, or desktop entries | `home/user.nix` | Loaded through `home-manager.users.artem`. |
 | Change Zed editor settings | `home/zed/settings.json` | Do not inline; `home/user.nix` reads this file. |
+| Add Happ proxy client | `home/happ-desktop.nix` | Fetched from upstream GitHub release .deb. |
 | Rebuild the machine | `rebuild.sh` or command below | Target is always `.#desktop`. |
 | Inspect generated disks/modules | `hosts/desktop/hardware-configuration.nix` | Treat as generated host hardware state. |
 
@@ -45,6 +46,7 @@ nixos-config/
 | `pycharmOverlay` | overlay | `flake.nix` | Keeps PyCharm on the pinned nixpkgs revision. |
 | `toggleBluetoothDevice` | HM script package | `home/user.nix` | Desktop shortcut helper for device `AC:80:0A:87:D6:52`. |
 | `amneziaVpnSafeLauncher` | HM script package | `home/user.nix` | Wayland/software-rendering launcher for AmneziaVPN. |
+| `happ-desktop` | HM package | `home/happ-desktop.nix` | Happ proxy client (Qt6, unpacked from upstream .deb). |
 
 ## CONVENTIONS
 
@@ -68,6 +70,7 @@ nixos-config/
 - Plasma 6 desktop with SDDM, fish login shell, Alacritty terminal, Zellij, Yazi, Starship, and Zed.
 - Amnezia VPN has two local workarounds: stable package overlay and a sleep hook that kills Amnezia processes before suspend.
 - PyCharm VM options are configured both system-wide (`PYCHARM_VM_OPTIONS`) and through Home Manager dotfile content.
+- Happ proxy client is packaged from upstream `.deb` via `autoPatchelfHook` and wrapped with Qt plugin paths.
 - Zed disables format-on-save for Python, Dockerfile, YAML, TSX, and JavaScript, and disables telemetry metrics.
 
 ## COMMANDS
