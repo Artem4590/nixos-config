@@ -2,10 +2,15 @@
   "base_keymap": "JetBrains",
   "ui_font_size": 16,
   "buffer_font_size": 14,
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000,
+    },
+  },
   "theme": {
     "mode": "dark",
     "light": "One Light",
-    "dark": "Dracula",
+    "dark": "Colorizer Pro",
   },
   "project_panel": {
     "dock": "left",
