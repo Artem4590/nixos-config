@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  kimi-code,
   ...
 }:
 
@@ -37,6 +38,7 @@ in
   home.username = "artem";
   home.homeDirectory = "/home/artem";
   home.stateVersion = "26.05";
+  home.enableNixpkgsReleaseCheck = false;
 
   programs.fish = {
     enable = true;
@@ -178,7 +180,7 @@ in
     ty
     gnumake
     glow # Markdown terminal reader
-    nodejs_25
+    nodejs_24
     opencode
     unzip
     jetbrains.pycharm
@@ -186,5 +188,6 @@ in
     obs-studio
     mpv
     toggleBluetoothDevice
+    kimi-code
   ];
 }

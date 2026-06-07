@@ -16,6 +16,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    kimi-code = {
+      url = "github:MoonshotAI/kimi-code";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -25,6 +30,7 @@
       nixpkgs-pycharm,
       nixpkgs-stable,
       home-manager,
+      kimi-code,
       ...
     }:
     let
@@ -83,7 +89,10 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.users.artem = import ./home/user.nix;
+            home-manager.users.artem = { config, lib, pkgs, ... }: import ./home/user.nix {
+              inherit config lib pkgs;
+              kimi-code = kimi-code.packages.${system}.kimi-code;
+            };
           }
         ];
       };

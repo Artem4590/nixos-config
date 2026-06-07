@@ -20,13 +20,33 @@
         "type": "github"
       }
     },
+    "kimi-code": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780486267,
+        "narHash": "sha256-4d7vhG6dbrqjil43YpNy3wO/SIcN/XvNb6rvfJjZx6E=",
+        "owner": "MoonshotAI",
+        "repo": "kimi-code",
+        "rev": "90879f37af2ddb941223d293a67615f8f557e3af",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MoonshotAI",
+        "repo": "kimi-code",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1777954456,
-        "narHash": "sha256-hGdgeU2Nk87RAuZyYjyDjFL6LK7dAZN5RE9+hrDTkDU=",
+        "lastModified": 1780243769,
+        "narHash": "sha256-x5UQuRsH3MqI0U9afaXSNqzTPSeZlRLvFAav2Ux1pNw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "549bd84d6279f9852cae6225e372cc67fb91a4c1",
+        "rev": "331800de5053fcebacf6813adb5db9c9dca22a0c",
         "type": "github"
       },
       "original": {
@@ -71,6 +91,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "kimi-code": "kimi-code",
         "nixpkgs": "nixpkgs",
         "nixpkgs-pycharm": "nixpkgs-pycharm",
         "nixpkgs-stable": "nixpkgs-stable"
