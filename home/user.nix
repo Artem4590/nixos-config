@@ -64,19 +64,24 @@ in
 
   programs.htop.enable = true;
 
-  programs.alacritty = {
+  programs.kitty = {
     enable = true;
-    # theme = "xterm";
-    theme = "blood_moon";
+    theme = "Adventure Time";
     settings = {
-      window.startup_mode = "Maximized";
-      env.TERM = "xterm-256color";
-      font.size = 11;
+      touch_scroll_multiplier = "6.0";
+      wheel_scroll_multiplier = "6.0";
+      hide_window_decorations = true;
+      progress_bar = "hidden";
     };
-  };
-
-  programs.wezterm = {
-    enable = true;
+    keybindings = {
+      "alt+left" = "neighboring_window left";
+      "alt+right" = "neighboring_window right";
+      "alt+up" = "neighboring_window up";
+      "alt+down" = "neighboring_window down";
+      "ctrl+shift+enter" = "new_window_with_cwd";
+      # New tab is created next to the current one instead of at the end.
+      "ctrl+shift+t" = "launch --type=tab --location=after --cwd=current";
+    };
   };
 
   programs.git = {
@@ -130,7 +135,7 @@ in
   '';
 
   home.sessionVariables = {
-    TERMINAL = "alacritty";
+    TERMINAL = "kitty";
     NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
     PYCHARM_VM_OPTIONS = "${config.home.homeDirectory}/.config/JetBrains/pycharm64.vmoptions";
   };
@@ -160,9 +165,9 @@ in
     '';
   };
 
-  # Plasma: Ctrl+Alt+T запускает Alacritty.
+  # Plasma: Ctrl+Alt+T запускает Kitty.
   qt.kde.settings = {
-    kglobalshortcutsrc."services"."Alacritty.desktop"._launch = "Ctrl+Alt+T";
+    kglobalshortcutsrc."services"."kitty.desktop"._launch = "Ctrl+Alt+T";
     kglobalshortcutsrc."services"."toggle-bluetooth-ac800a87d652.desktop"._launch = "Ctrl+B";
   };
 

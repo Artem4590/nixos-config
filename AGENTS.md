@@ -1,87 +1,243 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-05-12
-**Commit:** abaa178
+**Generated:** 2026-06-12
+**Commit:** cd9efda
 **Branch:** master
 
 ## OVERVIEW
 
-Single-host NixOS flake for `desktop` on `x86_64-linux`. Uses nixos-unstable by default, Home Manager for user `artem`, and selective pinned/stable package overrides for Amnezia VPN and PyCharm.
+This is a single-host NixOS flake for a `x86_64-linux` desktop machine. The configured hostname is `nixos`, but all host-specific configuration lives under `hosts/desktop/`. The system tracks `nixos-unstable`, with two intentional package overrides: `amnezia-vpn` is taken from `nixos-25.05` (stable), and `jetbrains.pycharm` is pinned to a fixed `nixpkgs` revision that ships PyCharm 2025.3.3.
+
+User `artem` is managed through Home Manager with `home-manager.useGlobalPkgs = true`, so the same overlaid `pkgs` set is used for both system and user packages.
+
+Primary desktop environment: Plasma 6 with SDDM, fish login shell, Kitty terminal, Zellij, Yazi, Starship, Zed, and PyCharm.
 
 ## STRUCTURE
 
 ```text
 nixos-config/
 |-- flake.nix                         # flake inputs, overlays, nixosConfigurations.desktop
-|-- rebuild.sh                        # sudo nixos-rebuild switch --flake ./#desktop
-|-- hosts/desktop/configuration.nix   # system, Plasma, Docker, VirtualBox, Amnezia, packages
+|-- flake.lock                        # pinned input revisions
+|-- rebuild.sh                        # one-line wrapper: sudo nixos-rebuild switch --flake ./#desktop
+|-- hosts/desktop/configuration.nix   # system config: boot, networking, Plasma, Docker, VirtualBox, packages
 |-- hosts/desktop/hardware-configuration.nix
-|                                      # generated hardware scan; avoid hand edits
-`-- home/
-    |-- user.nix                      # Home Manager programs, packages, desktop entries
-    `-- zed/settings.json             # Zed settings imported via builtins.readFile
+|                                      # generated hardware scan; do not hand-edit
+|-- home/
+|   |-- user.nix                      # Home Manager programs, packages, desktop entries, session vars
+|   `-- zed/settings.json             # Zed editor settings imported via builtins.readFile
+`-- AGENTS.md                         # this file
 ```
 
-## WHERE TO LOOK
+## TECHNOLOGY STACK
 
-| Task | Location | Notes |
-|------|----------|-------|
-| Change flake inputs or overlays | `flake.nix` | `nixpkgs` is unstable; stable/pinned inputs are intentionally narrow. |
-| Add a system service or kernel/system option | `hosts/desktop/configuration.nix` | Imported directly by `nixosConfigurations.desktop`. |
-| Add user programs, dotfiles, or desktop entries | `home/user.nix` | Loaded through `home-manager.users.artem`. |
-| Change Zed editor settings | `home/zed/settings.json` | Do not inline; `home/user.nix` reads this file. |
-| Rebuild the machine | `rebuild.sh` or command below | Target is always `.#desktop`. |
-| Inspect generated disks/modules | `hosts/desktop/hardware-configuration.nix` | Treat as generated host hardware state. |
+- **OS / package manager:** NixOS with Flakes (`nix-command` + `flakes` experimental features enabled).
+- **Architecture:** `x86_64-linux` only.
+- **Main channel:** `nixos-unstable` (`github:NixOS/nixpkgs/nixos-unstable`).
+- **Stable override channel:** `nixos-25.05` (`github:NixOS/nixpkgs/nixos-25.05`).
+- **Pinned PyCharm channel:** fixed revision `5b2c2d84341b2afb5647081c1386a80d7a8d8605`.
+- **Home Manager:** `github:nix-community/home-manager`, following `nixpkgs`.
+- **AI editor:** `kimi-code` from `github:MoonshotAI/kimi-code`, following `nixpkgs`.
+- **Desktop:** KDE Plasma 6, SDDM, X server enabled.
+- **Kernel:** `pkgs.linuxPackages_7_0`.
+- **Bootloader:** systemd-boot with EFI variable updates enabled.
+- **Shell:** fish (login shell).
+- **Audio:** PipeWire (ALSA + Pulse compatibility).
+- **Networking:** NetworkManager; firewall opens TCP `8010`.
+- **Virtualization:** Docker, VirtualBox host.
+- **VPN:** AmneziaVPN (stable package overlay + systemd sleep hook).
 
-## CODE MAP
+## CODE ORGANIZATION AND MAIN MODULE DIVISIONS
 
-| Symbol | Type | Location | Role |
-|--------|------|----------|------|
-| `nixosConfigurations.desktop` | flake output | `flake.nix` | Only host build target. |
-| `pkgs` | package set | `flake.nix` | nixos-unstable with `allowUnfree = true`. |
-| `pkgsStable` | package set | `flake.nix` | Source for stable-only package overrides. |
-| `pkgsPycharm` | package set | `flake.nix` | Fixed nixpkgs rev for `jetbrains.pycharm`. |
-| `amneziaOverlay` | overlay | `flake.nix` | Replaces `amnezia-vpn` with stable package. |
-| `pycharmOverlay` | overlay | `flake.nix` | Keeps PyCharm on the pinned nixpkgs revision. |
-| `toggleBluetoothDevice` | HM script package | `home/user.nix` | Desktop shortcut helper for device `AC:80:0A:87:D6:52`. |
-| `amneziaVpnSafeLauncher` | HM script package | `home/user.nix` | Wayland/software-rendering launcher for AmneziaVPN. |
+### `flake.nix`
 
-## CONVENTIONS
+Defines inputs, the `pkgs` / `pkgsStable` / `pkgsPycharm` package sets, two overlays, and the single build target `nixosConfigurations.desktop`.
 
-- Keep this repo flat unless complexity grows; there are no shared `modules/`, `lib/`, or profile layers yet.
-- Host folder is `hosts/desktop`, but the configured hostname is `nixos`; do not infer host name from directory name.
+Key symbols:
+
+| Symbol | Role |
+|--------|------|
+| `pkgs` | Unstable package set with `allowUnfree = true`. |
+| `pkgsStable` | Stable package set used only for overrides. |
+| `pkgsPycharm` | Pinned package set used only for `jetbrains.pycharm`. |
+| `amneziaOverlay` | Replaces `amnezia-vpn` with the stable build. |
+| `pycharmOverlay` | Replaces `jetbrains.pycharm` with the pinned revision. |
+| `nixosConfigurations.desktop` | The only host build target. |
+
+### `hosts/desktop/configuration.nix`
+
+System-level configuration:
+
+- Boot, kernel, filesystems (imports `hardware-configuration.nix`).
+- Networking, hostname `nixos`, firewall, timezone, locales.
+- Plasma 6 desktop, SDDM, fonts, Bluetooth, printing.
+- Audio (PipeWire), Nix settings, Docker, VirtualBox.
+- User `artem` definition, groups (`networkmanager`, `wheel`, `docker`, `vboxusers`), fish login shell.
+- AmneziaVPN enable + systemd sleep hook to kill Amnezia processes before suspend.
+- System-wide packages and session variables.
+- `system.stateVersion = "26.05"`.
+
+### `hosts/desktop/hardware-configuration.nix`
+
+Generated by `nixos-generate-config`. Contains initrd modules, kernel modules (`kvm-amd`), filesystem UUIDs, zram swap, CPU microcode settings, and `mitigations=off`. Treat as generated host hardware state.
+
+### `home/user.nix`
+
+Home Manager configuration for user `artem`:
+
+- `home.username`, `home.homeDirectory`, `home.stateVersion = "26.05"`, `home.enableNixpkgsReleaseCheck = false`.
+- Shell: fish + Starship.
+- Terminal emulator: Kitty.
+- Multiplexer/file tools: Zellij, Yazi.
+- Editors: Vim, Zed.
+- Git with `delta` pager.
+- Office: ONLYOFFICE.
+- System monitors: bottom, htop.
+- Custom helper scripts:
+  - `toggleBluetoothDevice` — toggles connection to `AC:80:0A:87:D6:52`.
+  - `amneziaVpnSafeLauncher` — launches AmneziaVPN with Wayland/software-rendering tweaks.
+- Desktop entries and Plasma keyboard shortcuts:
+  - `Ctrl+Alt+T` → Kitty.
+  - `Ctrl+B` → toggle Bluetooth device.
+- Session variables and PATH (`~/.npm-global/bin`).
+- PyCharm VM options dotfile (`~/.config/JetBrains/pycharm64.vmoptions`).
+- User packages (see representative list below).
+
+### `home/zed/settings.json`
+
+External Zed settings file. Referenced from `home/user.nix` via `builtins.readFile ./zed/settings.json`. Keeps editor configuration separate from the Nix expression.
+
+### Representative package lists
+
+System packages (`environment.systemPackages`):
+
+```nix
+with pkgs; [
+  gcc
+  docker-compose
+  pkg-config
+  openssl
+  rust-analyzer
+  rustup
+  nil
+  nixd
+]
+```
+
+User packages (`home.packages`):
+
+```nix
+with pkgs; [
+  delta
+  neovim
+  telegram-desktop
+  google-chrome
+  zed-editor
+  bat
+  dua
+  jq
+  fastfetch
+  uv
+  ty
+  gnumake
+  glow # Markdown terminal reader
+  nodejs_24
+  opencode
+  unzip
+  jetbrains.pycharm
+  temporal-cli
+  obs-studio
+  mpv
+  toggleBluetoothDevice
+  kimi-code
+]
+```
+
+## DEVELOPMENT CONVENTIONS
+
+- Keep the repo flat; there are no shared `modules/`, `lib/`, or profile layers yet.
+- Host folder is `hosts/desktop`, but the configured hostname is `nixos`; do not infer hostname from directory name.
 - Put machine-wide packages in `environment.systemPackages`; put user applications in `home.packages`.
-- Keep `home-manager.useGlobalPkgs = true`; Home Manager consumes the same overlaid `pkgs` as the system.
-- Use `home.file` for user dotfiles. Zed settings stay in `home/zed/settings.json` and are imported into Home Manager.
-- Comments in existing Nix files are partly Russian; preserve nearby language/style when editing those blocks.
+- Keep `home-manager.useGlobalPkgs = true`; Home Manager must consume the same overlaid `pkgs` as the system.
+- Home Manager is also configured with `useUserPackages = true` and `backupFileExtension = "backup"`.
+- Use `home.file` for user dotfiles. Zed settings stay in `home/zed/settings.json` and are imported into Home Manager via `builtins.readFile`.
+- Comments in existing Nix files are partly Russian; preserve nearby language and style when editing those blocks.
+- Always keep `flake.lock` changes intentional and reviewable.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 
-- Do not hand-edit `hosts/desktop/hardware-configuration.nix` except for deliberate hardware-state changes; it is generated by `nixos-generate-config`.
-- Do not assign a package to `programs.amnezia-vpn`; the overlay already swaps `amnezia-vpn` to stable.
-- Do not remove the pinned `nixpkgs-pycharm` input unless PyCharm pinning is intentionally changed.
-- Do not bump `system.stateVersion` or `home.stateVersion` casually; both are set to `26.05`.
-- Do not add child `AGENTS.md` files for the current layout; `hosts/desktop` and `home` are too small to avoid duplication.
+- **Do not hand-edit `hosts/desktop/hardware-configuration.nix`** except for deliberate hardware-state changes; it is generated by `nixos-generate-config`.
+- **Do not assign a package to `programs.amnezia-vpn`**; the overlay already swaps `amnezia-vpn` to stable. The correct usage is `programs.amnezia-vpn.enable = true`.
+- **Do not remove the pinned `nixpkgs-pycharm` input** unless PyCharm pinning is intentionally changed.
+- **Do not bump `system.stateVersion` or `home.stateVersion` casually**; both are set to `"26.05"`.
+- Do not add child `AGENTS.md` files for the current layout; `hosts/desktop` and `home` are too small to justify duplication.
 
-## UNIQUE STYLES
-
-- Plasma 6 desktop with SDDM, fish login shell, Alacritty terminal, Zellij, Yazi, Starship, and Zed.
-- Amnezia VPN has two local workarounds: stable package overlay and a sleep hook that kills Amnezia processes before suspend.
-- PyCharm VM options are configured both system-wide (`PYCHARM_VM_OPTIONS`) and through Home Manager dotfile content.
-- Zed disables format-on-save for Python, Dockerfile, YAML, TSX, and JavaScript, and disables telemetry metrics.
-
-## COMMANDS
+## BUILD, TEST, AND DEPLOYMENT COMMANDS
 
 ```bash
+# Build and activate the system configuration (the normal deploy path).
 ./rebuild.sh
+
+# Equivalent manual command.
 sudo nixos-rebuild switch --flake ./#desktop
+
+# Build without activating (dry-ish verification).
+nixos-rebuild build --flake ./#desktop
+
+# Validate flake metadata and structure.
 nix flake check
 nix flake show
-nixos-rebuild build --flake ./#desktop
 ```
+
+There are no project-specific unit or integration tests. Correctness is verified by evaluating the flake (`nix flake check`) and building the configuration (`nixos-rebuild build --flake ./#desktop`). Activation is the actual deployment step.
+
+## CODE STYLE GUIDELINES
+
+- Nix expressions use the standard Nix formatting style seen in the existing files (attribute sets with `key = value;`, functions in `let ... in` form).
+- Write attribute-set fields one per line for readability; align `=` only when it improves clarity locally.
+- Keep comments close to the code they describe. Mixed English/Russian comments are acceptable; match the language of the surrounding block.
+- Use `with pkgs; [ ... ]` only for package lists, as already done in `configuration.nix` and `user.nix`.
+- Prefer explicit package references (e.g., `${pkgs.bluez}/bin/bluetoothctl`) in generated scripts to avoid runtime PATH assumptions.
+- Pin external inputs in `flake.nix` and let `flake.lock` record exact revisions.
+
+## TESTING INSTRUCTIONS
+
+1. Run `nix flake check` to ensure the flake evaluates and metadata is consistent.
+2. Run `nixos-rebuild build --flake ./#desktop` to verify the full system closure builds without errors.
+3. Run `nix flake show` to inspect available outputs and confirm `nixosConfigurations.desktop` is present.
+4. After a successful build, activate with `./rebuild.sh` or `sudo nixos-rebuild switch --flake ./#desktop`.
+
+If a rebuild fails:
+
+- Check overlay ordering in `flake.nix` (`amneziaOverlay`, then `pycharmOverlay`).
+- Verify `flake.lock` contains the expected revisions for `nixpkgs`, `nixpkgs-stable`, and `nixpkgs-pycharm`.
+- Confirm Home Manager option names match the current `home-manager` input.
+
+## SECURITY CONSIDERATIONS
+
+- `config.allowUnfree = true` is enabled globally for `pkgs`, `pkgsStable`, and `pkgsPycharm`, so proprietary packages (NVIDIA firmware, Steam, JetBrains IDEs, Google Chrome, etc.) can be installed.
+- `programs.nix-ld.enable = true` allows running dynamically linked non-Nix binaries by providing a standard dynamic linker. This improves compatibility but increases the attack surface for untrusted precompiled binaries.
+- `boot.kernelParams` includes `mitigations=off`, trading some CPU speculative-execution mitigations for performance. Do not change this unless you understand the security/performance tradeoff.
+- The firewall only opens TCP port `8010`. Verify this matches any services you run.
+- User `artem` is in the `wheel`, `docker`, and `vboxusers` groups, granting root-equivalent privileges (`wheel`), container capabilities (`docker`), and VirtualBox host access.
+- VirtualBox host support is enabled (`virtualisation.virtualbox.host.enable = true`); keep the VirtualBox kernel modules and extensions up to date.
+- AmneziaVPN runs as a system program and has a systemd sleep hook (`environment.etc."systemd/system-sleep/amnezia-vpn-stop"`) that kills Amnezia processes before suspend to avoid memory leaks and stale state.
+- Zed settings hardcode absolute `/nix/store/...` paths for `rust-analyzer` and `ruff` binaries. These become stale when those packages are garbage-collected or updated; update them when the referenced store paths change.
+
+## UNIQUE STYLES AND WORKAROUNDS
+
+- **Selective stable overrides:** Unstable is the default, but `amnezia-vpn` is pulled from stable, and `jetbrains.pycharm` is pinned to a specific nixpkgs revision to stay on version 2025.3.3.
+- **AmneziaVPN workarounds:**
+  1. Stable package overlay.
+  2. Sleep hook that kills Amnezia processes before suspend.
+  3. Custom desktop entry launcher that forces Wayland/software rendering (`QT_QPA_PLATFORM=wayland`, `QT_XCB_GL_INTEGRATION=none`, `QT_QUICK_BACKEND=software`).
+- **PyCharm VM options:** Configured both system-wide (`environment.sessionVariables.PYCHARM_VM_OPTIONS`) and through Home Manager dotfile content (`-Dawt.toolkit.name=WLToolkit`).
+- **Bluetooth toggle shortcut:** A generated desktop entry and Plasma shortcut (`Ctrl+B`) connect/disconnect a single hardcoded Bluetooth device (`AC:80:0A:87:D6:52`).
+- **Zed configuration:** Disables format-on-save for Python, Dockerfile, YAML, TSX, and JavaScript; disables telemetry metrics; uses JetBrains base keymap; terminal shell is set to `bash` even though fish is the system login shell.
+- **NPM prefix:** User session adds `~/.npm-global/bin` to PATH via `home.sessionPath` and `NPM_CONFIG_PREFIX`.
 
 ## NOTES
 
-- No README, CI, formatter config, pre-commit hook, or explicit flake checks are present as of generation.
-- LSP diagnostics report one pre-existing warning: `home/user.nix` has an unused `lib` lambda argument.
-- `flake.lock` is present; input changes should update it intentionally and be reviewed with the flake diff.
+- No README, CI, formatter config, pre-commit hook, or explicit flake checks are present.
+- `nix flake check --no-build` currently emits an evaluation warning: the option `programs.kitty.theme` has been renamed to `programs.kitty.themeFile`. Update `home/user.nix` once you want to adopt the new option name.
+- LSP diagnostics may report a warning in `home/user.nix`: the `lib` lambda argument is unused. This is harmless and pre-existing.
+- The `result` symlink produced by `nixos-rebuild build` is git-ignored.
