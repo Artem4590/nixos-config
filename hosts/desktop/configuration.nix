@@ -8,6 +8,7 @@
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelPackages = pkgs.linuxPackages_7_0;
 
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
