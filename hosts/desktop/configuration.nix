@@ -32,7 +32,11 @@
 
   # GUI
   services.xserver.enable = true;
-  services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.enable = false;
+  services.displayManager.ly = {
+    enable = true;
+    x11Support = true;
+  };
   services.desktopManager.plasma6.enable = true;
 
   services.xserver.xkb = {

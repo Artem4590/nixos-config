@@ -10,7 +10,7 @@ This is a single-host NixOS flake for a `x86_64-linux` desktop machine. The conf
 
 User `artem` is managed through Home Manager with `home-manager.useGlobalPkgs = true`, so the same overlaid `pkgs` set is used for both system and user packages.
 
-Primary desktop environment: Plasma 6 with SDDM, fish login shell, Kitty terminal, Zellij, Yazi, Starship, Zed, and PyCharm.
+Primary desktop environment: Plasma 6 with Ly display manager, fish login shell, Kitty terminal, Zellij, Yazi, Starship, Zed, and PyCharm.
 
 ## STRUCTURE
 
@@ -37,7 +37,7 @@ nixos-config/
 - **Pinned PyCharm channel:** fixed revision `5b2c2d84341b2afb5647081c1386a80d7a8d8605`.
 - **Home Manager:** `github:nix-community/home-manager`, following `nixpkgs`.
 - **AI editor:** `kimi-code` from `github:MoonshotAI/kimi-code`, following `nixpkgs`.
-- **Desktop:** KDE Plasma 6, SDDM, X server enabled.
+- **Desktop:** KDE Plasma 6, Ly display manager, X server enabled.
 - **Kernel:** `pkgs.linuxPackages_7_0`.
 - **Bootloader:** systemd-boot with EFI variable updates enabled.
 - **Shell:** fish (login shell).
@@ -69,7 +69,7 @@ System-level configuration:
 
 - Boot, kernel, filesystems (imports `hardware-configuration.nix`).
 - Networking, hostname `nixos`, firewall, timezone, locales.
-- Plasma 6 desktop, SDDM, fonts, Bluetooth, printing.
+- Plasma 6 desktop, Ly display manager, fonts, Bluetooth, printing.
 - Audio (PipeWire), Nix settings, Docker, VirtualBox.
 - User `artem` definition, groups (`networkmanager`, `wheel`, `docker`, `vboxusers`), fish login shell.
 - AmneziaVPN enable + systemd sleep hook to kill Amnezia processes before suspend.
