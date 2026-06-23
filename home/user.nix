@@ -66,7 +66,7 @@ in
 
   programs.kitty = {
     enable = true;
-    theme = "Adventure Time";
+    theme = "Galaxy";
     settings = {
       touch_scroll_multiplier = "6.0";
       wheel_scroll_multiplier = "6.0";
@@ -194,5 +194,7 @@ in
     mpv
     toggleBluetoothDevice
     kimi-code
+    gh
+    happ-desktop
   ];
 }

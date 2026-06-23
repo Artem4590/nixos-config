@@ -54,9 +54,20 @@
         config.allowUnfree = true;
       };
 
+      # Happ Proxy Utility — собираем из официального .deb
+      happ-desktop = pkgs.callPackage ./packages/happ-desktop.nix { };
+
+      # Polkit policy и helper-скрипты для Happ TUN mode
+      happ-polkit = pkgs.callPackage ./packages/happ-polkit.nix { inherit happ-desktop; };
+
       # Overlay: берём amnezia-vpn из stable
       amneziaOverlay = final: prev: {
         amnezia-vpn = pkgsStable.amnezia-vpn;
+      };
+
+      # Overlay: добавляем happ-desktop и happ-polkit в pkgs
+      happOverlay = final: prev: {
+        inherit happ-desktop happ-polkit;
       };
 
       # Overlay: держим PyCharm на отдельной зафиксированной ревизии nixpkgs,
@@ -78,6 +89,7 @@
             nixpkgs.overlays = [
               amneziaOverlay
               pycharmOverlay
+              happOverlay
             ];
           }
 

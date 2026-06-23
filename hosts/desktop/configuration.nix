@@ -98,6 +98,35 @@
   # ПАКЕТ НЕ УКАЗЫВАЕМ — overlay уже подменил его на stable
   programs.amnezia-vpn.enable = true;
 
+  # Happ VPN
+  systemd.services.happd = {
+    description = "Happ Process Control Daemon";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "simple";
+      User = "root";
+      Group = "root";
+      ExecStart = "${pkgs.happ-desktop}/bin/happd";
+      Restart = "on-failure";
+      RestartSec = "5s";
+      NoNewPrivileges = false;
+      TimeoutStopSec = "10s";
+      KillMode = "mixed";
+      KillSignal = "SIGTERM";
+    };
+  };
+
+  # Polkit policy и helper-скрипты, которые Happ ожидает для TUN mode.
+  # Без них GUI может отмечать серверы как unsupported или не запускать TUN.
+  security.polkit.enable = true;
+  systemd.tmpfiles.rules = [
+    "L+ /usr/local/bin/happ-tun2proxy-wrapper - - - - ${pkgs.happ-polkit}/lib/happ/happ-tun2proxy-wrapper"
+    "L+ /usr/local/bin/happ-kill-tun2proxy     - - - - ${pkgs.happ-polkit}/lib/happ/happ-kill-tun2proxy"
+    "L+ /usr/local/bin/happ-kill-singbox       - - - - ${pkgs.happ-polkit}/lib/happ/happ-kill-singbox"
+  ];
+
   # Останавливаем процессы Amnezia перед сном, чтобы избежать утечек памяти.
   environment.etc."systemd/system-sleep/amnezia-vpn-stop" = {
     text = ''
@@ -127,6 +156,7 @@
     rustup
     nil
     nixd
+    happ-polkit
   ];
 
   # ⚠️ ВАЖНО: версия первого установленного NixOS

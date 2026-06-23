@@ -149,6 +149,7 @@ with pkgs; [
   mpv
   toggleBluetoothDevice
   kimi-code
+  happ-desktop
 ]
 ```
 
@@ -230,6 +231,7 @@ If a rebuild fails:
   1. Stable package overlay.
   2. Sleep hook that kills Amnezia processes before suspend.
   3. Custom desktop entry launcher that forces Wayland/software rendering (`QT_QPA_PLATFORM=wayland`, `QT_XCB_GL_INTEGRATION=none`, `QT_QUICK_BACKEND=software`).
+- **Happ VPN:** Packaged from the official GitHub `.deb` release (`packages/happ-desktop.nix`) and exposed via an overlay. The `happd` daemon is enabled as a root systemd service (`systemd.services.happd`) for TUN/proxy functionality.
 - **PyCharm VM options:** Configured both system-wide (`environment.sessionVariables.PYCHARM_VM_OPTIONS`) and through Home Manager dotfile content (`-Dawt.toolkit.name=WLToolkit`).
 - **Bluetooth toggle shortcut:** A generated desktop entry and Plasma shortcut (`Ctrl+B`) connect/disconnect a single hardcoded Bluetooth device (`AC:80:0A:87:D6:52`).
 - **Zed configuration:** Disables format-on-save for Python, Dockerfile, YAML, TSX, and JavaScript; disables telemetry metrics; uses JetBrains base keymap; terminal shell is set to `bash` even though fish is the system login shell.
