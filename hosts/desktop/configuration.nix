@@ -98,6 +98,17 @@
   # ПАКЕТ НЕ УКАЗЫВАЕМ — overlay уже подменил его на stable
   programs.amnezia-vpn.enable = true;
 
+  # Throne proxy
+  programs.throne = {
+    enable = true;
+    tunMode = {
+      enable = true;
+      # По умолчанию используется setcap; если TUN не заработает,
+      # можно включить setuid.
+      setuid = false;
+    };
+  };
+
   # Happ VPN
   systemd.services.happd = {
     description = "Happ Process Control Daemon";
